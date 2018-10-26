@@ -1,0 +1,16 @@
+{
+  "name": "rails-nodejs",
+  "version": "0.1.0",
+  "description": "NodeJS on Rails: https://nodejsonrails.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sodacitylabs/rails-nodejs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sodacitylabs/rails-nodejs/issues"
+  },
+  "homepage": "https://github.com/sodacitylabs/rails-nodejs#readme"
+}

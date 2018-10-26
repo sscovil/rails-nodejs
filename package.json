@@ -1,16 +1,31 @@
 {
   "name": "rails-nodejs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "NodeJS on Rails: https://nodejsonrails.org",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sodacitylabs/rails-nodejs.git"
   },
   "keywords": [],
-  "author": "",
+  "author": {
+    "name": "George Fogle",
+    "web": "https://github.com/gfogle"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sodacitylabs/rails-nodejs/issues"
   },
-  "homepage": "https://github.com/sodacitylabs/rails-nodejs#readme"
+  "homepage": "https://github.com/sodacitylabs/rails-nodejs#readme",
+  "engines": {
+    "node": ">=8.11.0"
+  },
+  "bin": {
+    "nrx": "./src/cli.js"
+  },
+  "files": [
+    "src/*"
+  ],
+  "scripts": {
+    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push --tags"
+  }
 }

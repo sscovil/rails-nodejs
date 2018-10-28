@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
+const Rails = require("./rails");
 
 const [, , ...args] = process.argv;
 const dir = process.cwd();
 const cmd = args[0];
+const npmVersion = "0.2.0";
 const seedDirectories = [
   "app",
   "app/assets",
@@ -56,8 +58,12 @@ if (cmd === "new") {
       `${projectDirectory}/package.json`,
       JSON.stringify(
         {
-          bin: {
-            nrx: "./bin/cli.js"
+          name: project,
+          scripts: {
+            start: "./node_modules/.bin/nrx start"
+          },
+          dependencies: {
+            "rails-nodejs": `${npmVersion}`
           }
         },
         null,
@@ -87,4 +93,11 @@ if (cmd === "new") {
     console.error(ex.message);
     process.exit(1);
   }
+} else if (cmd === "server") {
+  const server = Rails.Server();
+
+  server.start();
+} else {
+  console.error(`Unknown command ${cmd}`);
+  process.exit(1);
 }

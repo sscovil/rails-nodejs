@@ -4,6 +4,7 @@ const fs = require("fs");
 const http = require("http");
 
 let routes = {};
+// todo: isolate this behind a function for checks in CLI etc or create CLI module
 const actionNames = [
   "create",
   "delete",

@@ -6,6 +6,8 @@ const Rails = require("./rails");
 const [, , ...args] = process.argv;
 const dir = process.cwd();
 const cmd = args[0];
+
+// todo: isolate all this behind a function for checks in CLI etc or create CLI module
 const npmVersion = "0.2.0";
 const seedDirectories = [
   "app",
@@ -35,6 +37,17 @@ const seedDirectories = [
   "test/mailers",
   "test/models",
   "tmp"
+];
+const actionNames = [
+  "create",
+  "delete",
+  "edit",
+  "find",
+  "index",
+  "list",
+  "new",
+  "show",
+  "update"
 ];
 
 if (cmd === "new") {
@@ -97,7 +110,47 @@ if (cmd === "new") {
   const server = Rails.Server();
 
   server.start();
+} else if (cmd === "generate" && args[1] === "controller") {
+  const name = args[2];
+  const action = args[3];
+
+  if (!name) {
+    console.error(`Generating a controller requires a controller name`);
+    process.exit(1);
+  } else if (name && fs.existsSync(`${dir}/app/controllers/${name}`)) {
+    console.error(
+      `Controller ${name} already exists. Did you mean to create an action instead?`
+    );
+    process.exit(1);
+  } else if (name && fs.existsSync(`${dir}/app/views/${name}`)) {
+    console.error(
+      `View ${name} already exists. Did you mean to create an action instead?`
+    );
+    process.exit(1);
+  } else if (action && actionNames.indexOf(action) === -1) {
+    console.error(`Action ${action} is not a valid action name.`);
+    process.exit(1);
+  }
+
+  fs.mkdirSync(`${dir}/app/controllers/${name}`);
+  fs.mkdirSync(`${dir}/app/views/${name}`);
+
+  if (action) {
+    fs.writeFileSync(
+      `${dir}/app/controllers/${name}/${action}.action.js`,
+      `module.exports = function(req, res) { throw new Error('Not implemented'); }`,
+      "utf8"
+    );
+  }
+
+  if (action && ["index", "new", "show", "edit"].indexOf(action) !== -1) {
+    fs.writeFileSync(
+      `${dir}/app/views/${name}/${action}.html.ejs`,
+      `<h1>${name}#${action}</h1>\n<p>Find me in app/views/${name}/${action}.html.ejs</p>`,
+      "utf8"
+    );
+  }
 } else {
-  console.error(`Unknown command ${cmd}`);
+  console.error(`Unknown command ${cmd} and args phrase`);
   process.exit(1);
 }

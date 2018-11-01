@@ -1,5 +1,6 @@
 "use strict";
 
+const ejs = require("ejs");
 const fs = require("fs");
 const http = require("http");
 const url = require("url");
@@ -7,6 +8,7 @@ const url = require("url");
 let routes = {};
 
 // todo: isolate all this behind function calls?
+const ejsVersion = "2.6.1";
 const npmVersion = "0.3.0";
 const seedDirectories = [
   "app",
@@ -76,10 +78,17 @@ function CLI() {
     fs.mkdirSync(`${root}/app/controllers/${name}`);
     fs.mkdirSync(`${root}/app/views/${name}`);
 
-    if (action) {
+    // todo: implement send function for api
+    if (action && viewActionNames.indexOf(action) === -1) {
       fs.writeFileSync(
         `${root}/app/controllers/${name}/${action}.action.js`,
         `module.exports = function(req, res) { throw new Error('Not implemented'); }`,
+        "utf8"
+      );
+    } else if (action && viewActionNames.indexOf(action) !== -1) {
+      fs.writeFileSync(
+        `${root}/app/controllers/${name}/${action}.action.js`,
+        `module.exports = function(req, res) { res.render(); }`,
         "utf8"
       );
     }
@@ -263,7 +272,8 @@ function CLI() {
             start: "./node_modules/.bin/nrx start"
           },
           dependencies: {
-            "rails-nodejs": `${npmVersion}`
+            ejs: ejsVersion,
+            "rails-nodejs": npmVersion
           }
         },
         null,
@@ -399,8 +409,39 @@ function Router() {
       return res.end();
     }
 
+    if (browserRequest) {
+      res.render = function(data) {
+        try {
+          const template = fs.readFileSync(
+            `${dir}/app/views/${controllerParam}/${action}.html.ejs`,
+            "utf8"
+          );
+          const rendered = ejs.render(template, data, {
+            views: [`${dir}/app/views`]
+          });
+
+          this.writeHead(200, {
+            "Content-Length": Buffer.byteLength(rendered),
+            "Content-Type": "text/html"
+          });
+          this.end(rendered);
+        } catch (ex) {
+          console.error(`Error rendering template: ${ex.message}`);
+          this.writeHead(400);
+          this.end();
+        }
+      };
+    }
+
     return actionFunction(req, res);
   }
+
+  /**
+   * Function attached to a response object for rending the view
+   *
+   * @param {*} data - Local values that are referenced in the EJS embedded code
+   */
+  function render(data) {}
 
   return {
     incomingRequest

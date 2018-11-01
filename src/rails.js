@@ -2,6 +2,7 @@
 
 const fs = require("fs");
 const http = require("http");
+const url = require("url");
 
 let routes = {};
 
@@ -298,20 +299,123 @@ function CLI() {
 }
 
 /**
+ * Routing incoming http requests to their appropriate controller actions
+ */
+function Router() {
+  function incomingRequest(req, res) {
+    console.log(`Incoming request to ${req.url}`);
+
+    // normalize the http method
+    req.method = req.method.toUpperCase();
+
+    const browserRequest = req.headers.accept.indexOf("html") !== -1;
+    const apiRequest = req.headers.accept.indexOf("json") !== -1;
+    const requestURL = url.parse(req.url).pathname;
+
+    if (requestURL === "/") {
+      // todo: handle a root action configuration
+      res.writeHead(200);
+      return res.end();
+    }
+
+    const splitRoute = requestURL.split("/");
+
+    splitRoute.shift();
+
+    const controllerParam = splitRoute[0];
+
+    if (!routes[controllerParam]) {
+      // todo: render a 404 page instead with better error messaging
+      res.writeHead(404);
+      return res.end();
+    }
+
+    let action;
+
+    if (req.method === "GET" && splitRoute.length === 1 && browserRequest) {
+      action = "index";
+    } else if (req.method === "GET" && splitRoute.length === 1 && apiRequest) {
+      action = "list";
+    } else if (req.method === "POST" && splitRoute.length === 1 && apiRequest) {
+      action = "create";
+    } else if (
+      req.method === "GET" &&
+      splitRoute.length === 2 &&
+      splitRoute[1] === "new" &&
+      browserRequest
+    ) {
+      action = "new";
+    } else if (
+      req.method === "GET" &&
+      splitRoute.length === 2 &&
+      !routes[controllerParam][splitRoute[1]] &&
+      routes[controllerParam][":id"] &&
+      browserRequest
+    ) {
+      action = "show";
+    } else if (
+      req.method === "GET" &&
+      splitRoute.length === 2 &&
+      !routes[controllerParam][splitRoute[1]] &&
+      routes[controllerParam][":id"] &&
+      apiRequest
+    ) {
+      action = "find";
+    } else if (
+      req.method === "PUT" &&
+      splitRoute.length === 2 &&
+      !routes[controllerParam][splitRoute[1]] &&
+      routes[controllerParam][":id"] &&
+      apiRequest
+    ) {
+      action = "update";
+    } else if (
+      req.method === "DELETE" &&
+      splitRoute.length === 2 &&
+      !routes[controllerParam][splitRoute[1]] &&
+      routes[controllerParam][":id"] &&
+      apiRequest
+    ) {
+      action = "delete";
+    } else if (
+      req.method === "GET" &&
+      splitRoute.length === 3 &&
+      !routes[controllerParam][splitRoute[1]] &&
+      routes[controllerParam][":id"] &&
+      routes[controllerParam][":id"]["edit"] &&
+      browserRequest
+    ) {
+      action = "edit";
+    } else {
+      res.writeHead(204);
+      return res.end();
+    }
+
+    const dir = process.cwd();
+    const actionFunction = require(`${dir}/app/controllers/${controllerParam}/${action}.action.js`);
+
+    if (typeof actionFunction !== "function") {
+      res.writeHead(204);
+      return res.end();
+    }
+
+    return actionFunction(req, res);
+  }
+
+  return {
+    incomingRequest
+  };
+}
+
+/**
  * Module to create a Rails server instance to handle incoming http requests
  */
 function Server() {
   const port = 3000;
-  const instance = http.createServer(handler);
+  const router = new Router();
+  const instance = http.createServer(router.incomingRequest);
 
   let started = false;
-
-  function handler(req, res) {
-    console.log(`Incoming request to ${req.url}`);
-
-    res.writeHead(200);
-    res.end();
-  }
 
   function start() {
     const start = Date.now();

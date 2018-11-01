@@ -7,7 +7,7 @@ const url = require("url");
 let routes = {};
 
 // todo: isolate all this behind function calls?
-const npmVersion = "0.2.0";
+const npmVersion = "0.3.0";
 const seedDirectories = [
   "app",
   "app/assets",

@@ -1,6 +1,6 @@
 {
   "name": "rails-nodejs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "NodeJS on Rails: https://nodejsonrails.org",
   "repository": {
     "type": "git",

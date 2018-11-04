@@ -280,6 +280,14 @@ function Router() {
     const apiRequest = req.headers.accept.indexOf("json") !== -1;
     const requestURL = url.parse(req.url).pathname;
 
+    if (Object.keys(routes).length === 0) {
+      res.writeHead(200, {
+        "Content-Length": Buffer.byteLength(Config.templates.welcome),
+        "Content-Type": "text/html"
+      });
+      res.end(Config.templates.welcome);
+    }
+
     if (requestURL === "/") {
       // todo: handle a root action configuration
       res.writeHead(200);

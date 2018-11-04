@@ -38,7 +38,7 @@ function CLI() {
     if (action && Config.viewActionNames.indexOf(action) === -1) {
       fs.writeFileSync(
         `${root}/app/controllers/${name}/${action}.action.js`,
-        `module.exports = function(req, res) { throw new Error('Not implemented'); }`,
+        `module.exports = function(req, res) { res.send(204); }`,
         "utf8"
       );
     } else if (action && Config.viewActionNames.indexOf(action) !== -1) {
@@ -364,6 +364,28 @@ function Router() {
       res.writeHead(204);
       return res.end();
     }
+
+    /**
+     * short-hand send an http code / data
+     */
+    res.send = function(code, data) {
+      try {
+        if (data) {
+          const content = JSON.stringify(data);
+          this.writeHead(200, {
+            "Content-Length": Buffer.byteLength(content),
+            "Content-Type": "application/json"
+          });
+          this.write(content);
+        } else {
+          this.writeHead(code);
+        }
+        this.end();
+      } catch (ex) {
+        this.writeHead(500);
+        this.end();
+      }
+    }.bind(res);
 
     if (browserRequest) {
       res.render = function(data) {

@@ -1,56 +1,12 @@
 "use strict";
 
+const Config = require("./config");
 const ejs = require("ejs");
 const fs = require("fs");
 const http = require("http");
 const url = require("url");
 
 let routes = {};
-
-// todo: isolate all this behind function calls?
-const ejsVersion = "2.6.1";
-const npmVersion = "0.3.0";
-const seedDirectories = [
-  "app",
-  "app/assets",
-  "app/assets/images",
-  "app/assets/fonts",
-  "app/assets/javascripts",
-  "app/assets/stylesheets",
-  "app/controllers",
-  "app/helpers",
-  "app/jobs",
-  "app/mailers",
-  "app/models",
-  "app/views",
-  "app/views/layouts",
-  "bin",
-  "config",
-  "db",
-  "lib",
-  "logs",
-  "public",
-  "test",
-  "test/controllers",
-  "test/fixtures",
-  "test/integration",
-  "test/jobs",
-  "test/mailers",
-  "test/models",
-  "tmp"
-];
-const actionNames = [
-  "create",
-  "delete",
-  "edit",
-  "find",
-  "index",
-  "list",
-  "new",
-  "show",
-  "update"
-];
-const viewActionNames = ["index", "new", "show", "edit"];
 
 /**
  * Module to isolate some logic behind CLI commands. Allows cli.js to focus on
@@ -71,7 +27,7 @@ function CLI() {
       throw new Error(
         `View ${name} already exists. Did you mean to create an action instead?`
       );
-    } else if (action && actionNames.indexOf(action) === -1) {
+    } else if (action && Config.actionNames.indexOf(action) === -1) {
       throw new Error(`Action ${action} is not a valid action name.`);
     }
 
@@ -79,13 +35,13 @@ function CLI() {
     fs.mkdirSync(`${root}/app/views/${name}`);
 
     // todo: implement send function for api
-    if (action && viewActionNames.indexOf(action) === -1) {
+    if (action && Config.viewActionNames.indexOf(action) === -1) {
       fs.writeFileSync(
         `${root}/app/controllers/${name}/${action}.action.js`,
         `module.exports = function(req, res) { throw new Error('Not implemented'); }`,
         "utf8"
       );
-    } else if (action && viewActionNames.indexOf(action) !== -1) {
+    } else if (action && Config.viewActionNames.indexOf(action) !== -1) {
       fs.writeFileSync(
         `${root}/app/controllers/${name}/${action}.action.js`,
         `module.exports = function(req, res) { res.render(); }`,
@@ -93,7 +49,7 @@ function CLI() {
       );
     }
 
-    if (action && viewActionNames.indexOf(action) !== -1) {
+    if (action && Config.viewActionNames.indexOf(action) !== -1) {
       fs.writeFileSync(
         `${root}/app/views/${name}/${action}.html.ejs`,
         `<h1>${name}#${action}</h1>\n<p>Find me in app/views/${name}/${action}.html.ejs</p>`,
@@ -143,7 +99,7 @@ function CLI() {
           action.length !== 3 ||
           action[1] !== "action" ||
           action[2] !== "js" ||
-          actionNames.indexOf(action[0]) === -1 ||
+          Config.actionNames.indexOf(action[0]) === -1 ||
           !fs
             .lstatSync(`${dir}/app/controllers/${controllers[i]}/${actions[j]}`)
             .isFile()
@@ -272,8 +228,8 @@ function CLI() {
             start: "./node_modules/.bin/nrx start"
           },
           dependencies: {
-            ejs: ejsVersion,
-            "rails-nodejs": npmVersion
+            ejs: Config.versions.ejs,
+            "rails-nodejs": Config.versions.npm
           }
         },
         null,
@@ -296,8 +252,8 @@ function CLI() {
     fs.writeFileSync(`${projectDirectory}/.nvmrc`, `v8.11.0\n`, "utf8");
 
     // all the application code
-    for (let i = 0; i < seedDirectories.length; i++) {
-      fs.mkdirSync(`${projectDirectory}/${seedDirectories[i]}`);
+    for (let i = 0; i < Config.seedDirectories.length; i++) {
+      fs.mkdirSync(`${projectDirectory}/${Config.seedDirectories[i]}`);
     }
   }
 

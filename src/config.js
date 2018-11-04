@@ -43,7 +43,8 @@ module.exports = {
   ],
   versions: {
     ejs: "2.6.1",
-    npm: "0.3.0"
+    npm: "0.3.0",
+    uuid: "3.3.2"
   },
   viewActionNames = ["index", "new", "show", "edit"]
 };

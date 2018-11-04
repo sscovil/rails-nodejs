@@ -5,6 +5,7 @@ const ejs = require("ejs");
 const fs = require("fs");
 const http = require("http");
 const url = require("url");
+const uuid = require("uuid");
 
 let routes = {};
 
@@ -229,7 +230,8 @@ function CLI() {
           },
           dependencies: {
             ejs: Config.versions.ejs,
-            "rails-nodejs": Config.versions.npm
+            "rails-nodejs": Config.versions.npm,
+            uuid: Config.versions.uuid
           }
         },
         null,
@@ -271,8 +273,8 @@ function Router() {
   function incomingRequest(req, res) {
     console.log(`Incoming request to ${req.url}`);
 
-    // normalize the http method
-    req.method = req.method.toUpperCase();
+    req.method = req.method.toUpperCase(); // normalize the http method
+    req.id = uuid.v4(); // unique id for each http request
 
     const browserRequest = req.headers.accept.indexOf("html") !== -1;
     const apiRequest = req.headers.accept.indexOf("json") !== -1;

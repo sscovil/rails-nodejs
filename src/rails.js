@@ -418,7 +418,36 @@ function Router() {
       };
     }
 
-    return actionFunction(req, res);
+    /**
+     * Stream from Buffer and attach as `body` property to request
+     */
+    function parseBody(req, res, callback) {
+      if (["POST", "PUT"].indexOf(req.method) === -1) {
+        return cb(req, res);
+      }
+
+      var body = "";
+
+      req.on("data", function(data) {
+        body += data;
+
+        if (body.length > 1e6) {
+          res.send(400);
+        }
+      });
+
+      req.on("end", () => {
+        try {
+          req.body = JSON.parse(body);
+
+          cb(req, res);
+        } catch (ex) {
+          res.send(400);
+        }
+      });
+    }
+
+    return parseBody(req, res, actionFunction);
   }
 
   return {

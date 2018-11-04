@@ -415,7 +415,7 @@ function Router() {
           this.writeHead(400);
           this.end();
         }
-      };
+      }.bind(res);
     }
 
     /**

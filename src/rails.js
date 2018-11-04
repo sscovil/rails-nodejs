@@ -390,6 +390,11 @@ function Router() {
     }.bind(res);
 
     if (browserRequest) {
+      /**
+       * Function attached to a response object for rending the view
+       *
+       * @param {*} data - Local values that are referenced in the EJS embedded code
+       */
       res.render = function(data) {
         try {
           const template = fs.readFileSync(
@@ -415,13 +420,6 @@ function Router() {
 
     return actionFunction(req, res);
   }
-
-  /**
-   * Function attached to a response object for rending the view
-   *
-   * @param {*} data - Local values that are referenced in the EJS embedded code
-   */
-  function render(data) {}
 
   return {
     incomingRequest

@@ -256,7 +256,10 @@ function CLI() {
             uuid: Config.versions.uuid
           },
           devDependencies: {
-            eslint: Config.versions.eslint
+            eslint: Config.versions.eslint,
+            "eslint-config-prettier": "3.0.1",
+            "eslint-plugin-prettier": "2.6.2",
+            prettier: Config.versions.prettier
           }
         },
         null,
@@ -336,6 +339,13 @@ function CLI() {
     );
 
     // eslint files to ignore
+    fs.writeFileSync(
+      `${projectDirectory}/.eslintignore`,
+      `node_modules\npackage.json\napp/assets\ntmp\npublic\nlogs`,
+      "utf8"
+    );
+
+    // prettier files to ignore
     fs.writeFileSync(
       `${projectDirectory}/.eslintignore`,
       `node_modules\npackage.json\napp/assets\ntmp\npublic\nlogs`,

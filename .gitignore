@@ -62,3 +62,6 @@ typings/
 
 # locally linked folders for testing CLI
 links
+
+# IDE
+.vscode

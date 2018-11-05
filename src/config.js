@@ -325,6 +325,7 @@ module.exports = {
     ejs: "2.6.1",
     eslint: "5.8.0",
     npm: "0.3.0",
+    prettier: "1.14.2",
     uuid: "3.3.2"
   },
   viewActionNames: ["index", "new", "show", "edit"]

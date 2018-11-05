@@ -20,6 +20,7 @@ if (cmd === "new") {
   try {
     const server = Rails.Server();
 
+    cli.loadConfig();
     cli.loadControllers();
     server.start();
   } catch (ex) {

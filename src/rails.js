@@ -7,6 +7,7 @@ const http = require("http");
 const url = require("url");
 const uuid = require("uuid");
 
+let projectConfig = {};
 let routes = {};
 
 /**
@@ -57,6 +58,27 @@ function CLI() {
         "utf8"
       );
     }
+  }
+
+  /**
+   * Loads the project's config directory
+   */
+  function loadConfig() {
+    const dir = process.cwd();
+
+    if (!fs.existsSync(`${dir}/config`)) {
+      throw new Error(
+        `Cannot locate config in directory ${dir}. Ensure rails was started in the same filepath as your package.json and that config exists.`
+      );
+      process.exit(1);
+    } else if (!fs.existsSync(`${dir}/config/index.js`)) {
+      throw new Error(
+        `Cannot locate config/index.js in directory ${dir}. Ensure rails was started in the same filepath as your package.json and that config/index.js exists.`
+      );
+      process.exit(1);
+    }
+
+    projectConfig = require(`${dir}/config`);
   }
 
   /**
@@ -257,10 +279,27 @@ function CLI() {
     for (let i = 0; i < Config.seedDirectories.length; i++) {
       fs.mkdirSync(`${projectDirectory}/${Config.seedDirectories[i]}`);
     }
+
+    // base config.js file
+    const config = JSON.stringify(
+      {
+        routes: {
+          root: "" // special route. must be a stringified path
+        }
+      },
+      null,
+      2
+    );
+    fs.writeFileSync(
+      `${projectDirectory}/config/index.js`,
+      `module.exports = ${config};`,
+      "utf8"
+    );
   }
 
   return {
     generateController,
+    loadConfig,
     loadControllers,
     newProject
   };
@@ -280,7 +319,7 @@ function Router() {
     const apiRequest = req.headers.accept.indexOf("json") !== -1;
     const requestURL = url.parse(req.url).pathname;
 
-    if (Object.keys(routes).length === 0) {
+    if (Object.keys(routes).length === 0 && !projectConfig.routes.root.length) {
       res.writeHead(200, {
         "Content-Length": Buffer.byteLength(Config.templates.welcome),
         "Content-Type": "text/html"
@@ -288,20 +327,21 @@ function Router() {
       res.end(Config.templates.welcome);
     }
 
-    if (requestURL === "/") {
-      // todo: handle a root action configuration
+    if (requestURL === "/" && !projectConfig.routes.root.length) {
       res.writeHead(200);
       return res.end();
+    } else if (requestURL === "/" && projectConfig.routes.root.length) {
+      req.url = projectConfig.routes.root; // todo: this is gonna lose the query etc
     }
 
-    const splitRoute = requestURL.split("/");
+    const splitRoute = req.url.split("/");
 
     splitRoute.shift();
 
     const controllerParam = splitRoute[0];
 
     if (!routes[controllerParam]) {
-      // todo: render a 404 page instead with better error messaging
+      // todo: render a Routing Error page instead with better error messaging
       res.writeHead(404);
       return res.end();
     }
@@ -429,7 +469,7 @@ function Router() {
     /**
      * Stream from Buffer and attach as `body` property to request
      */
-    function parseBody(req, res, callback) {
+    function parseBody(req, res, cb) {
       if (["POST", "PUT"].indexOf(req.method) === -1) {
         return cb(req, res);
       }

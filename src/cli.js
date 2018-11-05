@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
 const Rails = require("./rails");
 
 const [, , ...args] = process.argv;

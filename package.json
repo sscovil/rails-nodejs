@@ -27,7 +27,26 @@
     "src/*"
   ],
   "scripts": {
-    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push upstream --tags"
+    "lint": "./node_modules/.bin/eslint --color src test",
+    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push upstream --tags",
+    "test": "NODE_ENV=test node_modules/.bin/jest --forceExit --detectOpenHandles --runInBand --coverage --collectCoverageFrom=src/**/*.js test"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testURL": "http://localhost",
+    "bail": false,
+    "verbose": true,
+    "moduleFileExtensions": [
+      "js",
+      "jsx"
+    ],
+    "moduleDirectories": [
+      "node_modules"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+      "\\.(css|less)$": "<rootDir>/__mocks__/styleMock.js"
+    }
   },
   "dependencies": {
     "ejs": "2.6.1",
@@ -36,8 +55,10 @@
   },
   "devDependencies": {
     "eslint": "5.8.0",
+    "eslint-plugin-jest": "21.27.1",
     "eslint-config-prettier": "3.0.1",
     "eslint-plugin-prettier": "2.6.2",
+    "jest": "23.5.0",
     "prettier": "1.14.2"
   }
 }

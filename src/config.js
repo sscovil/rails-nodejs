@@ -323,6 +323,7 @@ module.exports = {
   },
   versions: {
     ejs: "2.6.1",
+    eslint: "5.8.0",
     npm: "0.3.0",
     uuid: "3.3.2"
   },

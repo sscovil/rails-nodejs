@@ -254,6 +254,9 @@ function CLI() {
             ejs: Config.versions.ejs,
             "rails-nodejs": Config.versions.npm,
             uuid: Config.versions.uuid
+          },
+          devDependencies: {
+            eslint: Config.versions.eslint
           }
         },
         null,
@@ -300,6 +303,42 @@ function CLI() {
     fs.writeFileSync(
       `${projectDirectory}/.editorconfig`,
       Config.templates.editorConfig,
+      "utf8"
+    );
+
+    // eslint for node server
+    fs.writeFileSync(
+      `${projectDirectory}/.eslintrc.json`,
+      JSON.stringify(
+        {
+          env: {
+            es6: true,
+            node: true
+          },
+          parserOptions: {
+            ecmaVersion: 2017
+          },
+          extends: ["eslint:recommended"],
+          rules: {
+            "no-console": ["warn"],
+            "no-empty": [
+              "error",
+              {
+                allowEmptyCatch: true
+              }
+            ]
+          }
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+
+    // eslint files to ignore
+    fs.writeFileSync(
+      `${projectDirectory}/.eslintignore`,
+      `node_modules\npackage.json\napp/assets\ntmp\npublic\nlogs`,
       "utf8"
     );
   }

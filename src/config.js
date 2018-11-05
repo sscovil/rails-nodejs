@@ -42,6 +42,19 @@ module.exports = {
     "tmp"
   ],
   templates: {
+    editorConfig: `
+    # http://editorconfig.org
+    root = true
+
+    [*]
+    charset = utf-8
+    end_of_line = lf
+    indent_size = 2
+    indent_style = space
+    insert_final_newline = true
+    max_line_length = 80
+    trim_trailing_whitespace = true
+    `,
     welcome: `
     <!doctype html>
     <html>
@@ -112,47 +125,47 @@ module.exports = {
             margin-bottom: 10px;
             font-size: 14px;
           }
-    
+
           #about-content {
             background-color: #ffd;
             border: 1px solid #fc0;
             margin-left: -55px;
             margin-right: -10px;
           }
-    
+
           #about-content table {
             margin-top: 10px;
             margin-bottom: 10px;
             font-size: 11px;
             border-collapse: collapse;
           }
-    
+
           #about-content td {
             padding: 10px;
             padding-top: 3px;
             padding-bottom: 3px;
           }
-    
+
           #about-content td.name  {
             font-weight: bold;
             vertical-align: top;
             color: #555;
           }
-    
+
           #about-content td.value {
             color: #000
           }
-    
+
           #about-content ul {
             padding: 0;
             list-style-type: none;
           }
-    
+
           #about-content.failure {
             background-color: #fcc;
             border: 1px solid #f00;
           }
-    
+
           #about-content.failure p {
             margin: 0;
             padding: 10px;
@@ -168,12 +181,12 @@ module.exports = {
             margin-top: 25px;
             padding-top: 15px;
           }
-    
+
           #getting-started h1 {
             margin: 0;
             font-size: 20px;
           }
-    
+
           #getting-started h2 {
             margin: 0;
             font-size: 14px;
@@ -181,25 +194,25 @@ module.exports = {
             color: #333;
             margin-bottom: 25px;
           }
-    
+
           #getting-started ol {
             margin-left: 0;
             padding-left: 0;
           }
-    
+
           #getting-started li {
             font-size: 18px;
             color: #888;
             margin-bottom: 25px;
           }
-    
+
           #getting-started li h2 {
             margin: 0;
             font-weight: normal;
             font-size: 18px;
             color: #333;
           }
-    
+
           #getting-started li p {
             color: #555;
             font-size: 13px;
@@ -214,18 +227,18 @@ module.exports = {
             margin-left: 0;
             padding-left: 0;
           }
-    
+
           #sidebar ul h3 {
             margin-top: 25px;
             font-size: 16px;
             padding-bottom: 10px;
             border-bottom: 1px solid #ccc;
           }
-    
+
           #sidebar li {
             list-style-type: none;
           }
-    
+
           #sidebar ul.links li {
             margin-bottom: 5px;
           }

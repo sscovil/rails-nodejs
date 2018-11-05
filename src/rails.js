@@ -295,6 +295,13 @@ function CLI() {
       `module.exports = ${config};`,
       "utf8"
     );
+
+    // editor config
+    fs.writeFileSync(
+      `${projectDirectory}/.editorconfig`,
+      Config.templates.editorConfig,
+      "utf8"
+    );
   }
 
   return {

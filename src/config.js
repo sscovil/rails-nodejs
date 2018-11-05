@@ -55,6 +55,55 @@ module.exports = {
     max_line_length = 80
     trim_trailing_whitespace = true
     `,
+    errors: {
+      routing: (err, msg) => `
+      <!doctype html>
+      <html>
+        <head>
+          <title>Controller: Exception</title>
+
+          <style type="text/css" media="screen">
+            body {
+              margin: 0;
+              margin-bottom: 25px;
+              padding: 0;
+              background-color: #f0f0f0;
+              font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
+              font-size: 13px;
+              color: #333;
+            }
+
+            header {
+              width: 100%;
+              color: #f0f0f0;
+              background: #44883e;
+              padding: 0.5em 1.5em;
+            }
+
+            header h1 {
+              margin: 0.2em 0;
+              line-height: 1.1em;
+              font-size: 2em;
+            }
+
+            main h2 {
+              color: #a6202a;
+              padding: 0 1.5em;
+            }
+          </style>
+        </head>
+        <body>
+          <header>
+            <h1>${err}</h1>
+          </header>
+
+          <main>
+            <h2>${msg}</h2>
+          </main>
+        </body>
+      </html>
+      `
+    },
     welcome: `
     <!doctype html>
     <html>

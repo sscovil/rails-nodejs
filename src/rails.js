@@ -70,12 +70,10 @@ function CLI() {
       throw new Error(
         `Cannot locate config in directory ${dir}. Ensure rails was started in the same filepath as your package.json and that config exists.`
       );
-      process.exit(1);
     } else if (!fs.existsSync(`${dir}/config/index.js`)) {
       throw new Error(
         `Cannot locate config/index.js in directory ${dir}. Ensure rails was started in the same filepath as your package.json and that config/index.js exists.`
       );
-      process.exit(1);
     }
 
     projectConfig = require(`${dir}/config`);
@@ -92,7 +90,6 @@ function CLI() {
       throw new Error(
         `Cannot locate app/controllers in directory ${dir}. Ensure rails was started in the same filepath as your package.json and that app/controllers exists.`
       );
-      process.exit(1);
     }
 
     const controllers = fs.readdirSync(`${dir}/app/controllers`);
@@ -132,7 +129,6 @@ function CLI() {
               controllers[i]
             } is not of the supported format.`
           );
-          process.exit(1);
         }
 
         // todo: maybe extract these to independent functions and a switch?
@@ -218,7 +214,6 @@ function CLI() {
           });
         } else {
           throw new Error(`action ${action[0]} not supported in Rails`);
-          process.exit(1);
         }
       }
     }
@@ -375,7 +370,11 @@ function Router() {
     const apiRequest = req.headers.accept.indexOf("json") !== -1;
     const requestURL = url.parse(req.url).pathname;
 
-    if (Object.keys(routes).length === 0 && !projectConfig.routes.root.length) {
+    if (
+      requestURL === "/" &&
+      Object.keys(routes).length === 0 &&
+      !projectConfig.routes.root.length
+    ) {
       res.writeHead(200, {
         "Content-Length": Buffer.byteLength(Config.templates.welcome),
         "Content-Type": "text/html"
@@ -384,6 +383,7 @@ function Router() {
     }
 
     if (requestURL === "/" && !projectConfig.routes.root.length) {
+      // todo: is this still correct?
       res.writeHead(200);
       return res.end();
     } else if (requestURL === "/" && projectConfig.routes.root.length) {
@@ -396,10 +396,20 @@ function Router() {
 
     const controllerParam = splitRoute[0];
 
-    if (!routes[controllerParam]) {
+    if (!routes[controllerParam] && apiRequest) {
       // todo: render a Routing Error page instead with better error messaging
       res.writeHead(404);
       return res.end();
+    } else if (!routes[controllerParam] && browserRequest) {
+      const error = Config.templates.errors.routing(
+        `Routing Error`,
+        `No route matches [${req.method}] "${requestURL}"`
+      );
+      res.writeHead(200, {
+        "Content-Length": Buffer.byteLength(error),
+        "Content-Type": "text/html"
+      });
+      res.end(error);
     }
 
     let action;
@@ -464,7 +474,27 @@ function Router() {
     }
 
     const dir = process.cwd();
-    const actionFunction = require(`${dir}/app/controllers/${controllerParam}/${action}.action.js`);
+    let actionFunction;
+
+    try {
+      actionFunction = require(`${dir}/app/controllers/${controllerParam}/${action}.action.js`);
+
+      if (typeof actionFunction !== "function") {
+        throw new Error(
+          `Typeof ${dir}/app/controllers/${controllerParam}/${action}.action.js is not a function`
+        );
+      }
+    } catch (ex) {
+      const error = Config.templates.errors.routing(
+        `Routing Error`,
+        `No route matches [${req.method}] "${requestURL}"`
+      );
+      res.writeHead(200, {
+        "Content-Length": Buffer.byteLength(error),
+        "Content-Type": "text/html"
+      });
+      return res.end(error);
+    }
 
     if (typeof actionFunction !== "function") {
       res.writeHead(204);

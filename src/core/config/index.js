@@ -87,7 +87,7 @@ module.exports = {
             }
 
             main h2 {
-              color: #a6202a;
+              color: #44883e;
               padding: 0 1.5em;
             }
           </style>

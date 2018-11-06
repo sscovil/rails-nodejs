@@ -1,9 +1,7 @@
 "use strict";
 
 const Config = require("./config");
-const ejs = require("ejs");
 const fs = require("fs");
-const http = require("http");
 const url = require("url");
 const uuid = require("uuid");
 

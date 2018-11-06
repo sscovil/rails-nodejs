@@ -373,6 +373,7 @@ module.exports = {
   versions: {
     ejs: "2.6.1",
     eslint: "5.8.0",
+    knex: "0.15.2",
     npm: "0.3.0",
     prettier: "1.14.2",
     uuid: "3.3.2"

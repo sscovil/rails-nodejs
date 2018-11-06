@@ -31,6 +31,7 @@ module.exports = function(name, root) {
         },
         dependencies: {
           ejs: Config.versions.ejs,
+          knex: Config.versions.knex,
           "rails-nodejs": Config.versions.npm,
           uuid: Config.versions.uuid
         },

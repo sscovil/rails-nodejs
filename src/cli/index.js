@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const Rails = require("./rails");
+const Rails = require("../core");
 
 const [, , ...args] = process.argv;
 const dir = process.cwd();
 const cmd = args[0];
 
-const cli = require("./rails").CLI();
+const cli = Rails.CLI();
 
 if (cmd === "new") {
   try {

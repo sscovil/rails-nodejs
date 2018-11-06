@@ -16,51 +16,6 @@ let routes = {};
  */
 function CLI() {
   /**
-   * Create an empty controller or an optional action with it
-   */
-  function generateController(root, name, action) {
-    if (!name) {
-      throw new Error(`Generating a controller requires a controller name`);
-    } else if (name && fs.existsSync(`${root}/app/controllers/${name}`)) {
-      throw new Error(
-        `Controller ${name} already exists. Did you mean to create an action instead?`
-      );
-    } else if (name && fs.existsSync(`${root}/app/views/${name}`)) {
-      throw new Error(
-        `View ${name} already exists. Did you mean to create an action instead?`
-      );
-    } else if (action && Config.actionNames.indexOf(action) === -1) {
-      throw new Error(`Action ${action} is not a valid action name.`);
-    }
-
-    fs.mkdirSync(`${root}/app/controllers/${name}`);
-    fs.mkdirSync(`${root}/app/views/${name}`);
-
-    // todo: implement send function for api
-    if (action && Config.viewActionNames.indexOf(action) === -1) {
-      fs.writeFileSync(
-        `${root}/app/controllers/${name}/${action}.action.js`,
-        `module.exports = function(req, res) { res.send(204); }`,
-        "utf8"
-      );
-    } else if (action && Config.viewActionNames.indexOf(action) !== -1) {
-      fs.writeFileSync(
-        `${root}/app/controllers/${name}/${action}.action.js`,
-        `module.exports = function(req, res) { res.render(); }`,
-        "utf8"
-      );
-    }
-
-    if (action && Config.viewActionNames.indexOf(action) !== -1) {
-      fs.writeFileSync(
-        `${root}/app/views/${name}/${action}.html.ejs`,
-        `<h1>${name}#${action}</h1>\n<p>Find me in app/views/${name}/${action}.html.ejs</p>`,
-        "utf8"
-      );
-    }
-  }
-
-  /**
    * Loads the project's config directory
    */
   function loadConfig() {
@@ -133,7 +88,7 @@ function CLI() {
 
         // todo: maybe extract these to independent functions and a switch?
         if (action[0] === "create") {
-          routes[controllers].handlers.push({
+          routes[controllers[i]].handlers.push({
             verb: "POST",
             accepts: "application/json",
             fn: require(`${dir}/app/controllers/${
@@ -141,7 +96,7 @@ function CLI() {
             }/create.action.js`)
           });
         } else if (action[0] === "delete") {
-          routes[controllers][":id"].handlers.push({
+          routes[controllers[i]][":id"].handlers.push({
             verb: "DELETE",
             accepts: "application/json",
             fn: require(`${dir}/app/controllers/${
@@ -149,7 +104,7 @@ function CLI() {
             }/delete.action.js`)
           });
         } else if (action[0] === "edit") {
-          routes[controllers][":id"]["edit"] = {
+          routes[controllers[i]][":id"]["edit"] = {
             handlers: [
               {
                 verb: "GET",
@@ -161,7 +116,7 @@ function CLI() {
             ]
           };
         } else if (action[0] === "find") {
-          routes[controllers][":id"].handlers.push({
+          routes[controllers[i]][":id"].handlers.push({
             verb: "GET",
             accepts: "application/json",
             fn: require(`${dir}/app/controllers/${
@@ -169,7 +124,7 @@ function CLI() {
             }/find.action.js`)
           });
         } else if (action[0] === "index") {
-          routes[controllers].handlers.push({
+          routes[controllers[i]].handlers.push({
             verb: "GET",
             accepts: "application/html",
             fn: require(`${dir}/app/controllers/${
@@ -177,7 +132,7 @@ function CLI() {
             }/index.action.js`)
           });
         } else if (action[0] === "list") {
-          routes[controllers].handlers.push({
+          routes[controllers[i]].handlers.push({
             verb: "GET",
             accepts: "application/json",
             fn: require(`${dir}/app/controllers/${
@@ -185,7 +140,7 @@ function CLI() {
             }/list.action.js`)
           });
         } else if (action[0] === "new") {
-          routes[controllers]["edit"] = {
+          routes[controllers[i]]["edit"] = {
             handlers: [
               {
                 verb: "GET",
@@ -197,7 +152,7 @@ function CLI() {
             ]
           };
         } else if (action[0] === "show") {
-          routes[controllers][":id"].handlers.push({
+          routes[controllers[i]][":id"].handlers.push({
             verb: "GET",
             accepts: "application/html",
             fn: require(`${dir}/app/controllers/${
@@ -205,7 +160,7 @@ function CLI() {
             }/show.action.js`)
           });
         } else if (action[0] === "update") {
-          routes[controllers][":id"].handlers.push({
+          routes[controllers[i]][":id"].handlers.push({
             verb: "PUT",
             accepts: "application/json",
             fn: require(`${dir}/app/controllers/${
@@ -219,140 +174,11 @@ function CLI() {
     }
   }
 
-  /**
-   * Create a new rails project at the specified directory as the root
-   */
-  function newProject(name, root) {
-    const projectDirectory = `${root}/${name}`;
-
-    if (!name) {
-      throw new Error(`Running the new command requires a project name`);
-    } else if (fs.existsSync(projectDirectory)) {
-      throw new Error(
-        `Unable to create directory ${projectDirectory} because it already exists`
-      );
-    }
-
-    // root project
-    fs.mkdirSync(projectDirectory);
-
-    // todo: create a package-lock.json / shrinkwrap for the project
-    fs.writeFileSync(
-      `${projectDirectory}/package.json`,
-      JSON.stringify(
-        {
-          name: name,
-          scripts: {
-            start: "./node_modules/.bin/nrx start"
-          },
-          dependencies: {
-            ejs: Config.versions.ejs,
-            "rails-nodejs": Config.versions.npm,
-            uuid: Config.versions.uuid
-          },
-          devDependencies: {
-            eslint: Config.versions.eslint,
-            "eslint-config-prettier": "3.0.1",
-            "eslint-plugin-prettier": "2.6.2",
-            prettier: Config.versions.prettier
-          }
-        },
-        null,
-        2
-      ),
-      "utf8"
-    );
-
-    // gitignore for files we dont want checked into source control
-    fs.writeFileSync(
-      `${projectDirectory}/.gitignore`,
-      `node_modules\npublic\nlog\ntmp/*\n`,
-      "utf8"
-    );
-
-    // todo: fill in this content
-    fs.writeFileSync(`${projectDirectory}/README.md`, ``, "utf8");
-
-    fs.writeFileSync(`${projectDirectory}/.npmrc`, `save_exact=true\n`, "utf8");
-    fs.writeFileSync(`${projectDirectory}/.nvmrc`, `v8.11.0\n`, "utf8");
-
-    // all the application code
-    for (let i = 0; i < Config.seedDirectories.length; i++) {
-      fs.mkdirSync(`${projectDirectory}/${Config.seedDirectories[i]}`);
-    }
-
-    // base config.js file
-    const config = JSON.stringify(
-      {
-        routes: {
-          root: "" // special route. must be a stringified path
-        }
-      },
-      null,
-      2
-    );
-    fs.writeFileSync(
-      `${projectDirectory}/config/index.js`,
-      `module.exports = ${config};`,
-      "utf8"
-    );
-
-    // editor config
-    fs.writeFileSync(
-      `${projectDirectory}/.editorconfig`,
-      Config.templates.editorConfig,
-      "utf8"
-    );
-
-    // eslint for node server
-    fs.writeFileSync(
-      `${projectDirectory}/.eslintrc.json`,
-      JSON.stringify(
-        {
-          env: {
-            es6: true,
-            node: true
-          },
-          parserOptions: {
-            ecmaVersion: 2017
-          },
-          extends: ["eslint:recommended"],
-          rules: {
-            "no-console": ["warn"],
-            "no-empty": [
-              "error",
-              {
-                allowEmptyCatch: true
-              }
-            ]
-          }
-        },
-        null,
-        2
-      ),
-      "utf8"
-    );
-
-    // eslint files to ignore
-    fs.writeFileSync(
-      `${projectDirectory}/.eslintignore`,
-      `node_modules\npackage.json\napp/assets\ntmp\npublic\nlogs`,
-      "utf8"
-    );
-
-    // prettier files to ignore
-    fs.writeFileSync(
-      `${projectDirectory}/.eslintignore`,
-      `node_modules\npackage.json\napp/assets\ntmp\npublic\nlogs`,
-      "utf8"
-    );
-  }
-
   return {
-    generateController,
+    generateController: require("./cli/generate/controller"),
     loadConfig,
     loadControllers,
-    newProject
+    newProject: require("./cli/new.js")
   };
 }
 
@@ -379,13 +205,15 @@ function Router() {
         "Content-Length": Buffer.byteLength(Config.templates.welcome),
         "Content-Type": "text/html"
       });
-      res.end(Config.templates.welcome);
+      return res.end(Config.templates.welcome);
     }
 
     if (requestURL === "/" && !projectConfig.routes.root.length) {
-      // todo: is this still correct?
-      res.writeHead(200);
-      return res.end();
+      res.writeHead(200, {
+        "Content-Length": Buffer.byteLength(Config.templates.welcome),
+        "Content-Type": "text/html"
+      });
+      return res.end(Config.templates.welcome);
     } else if (requestURL === "/" && projectConfig.routes.root.length) {
       req.url = projectConfig.routes.root; // todo: this is gonna lose the query etc
     }
@@ -501,56 +329,18 @@ function Router() {
       return res.end();
     }
 
-    /**
-     * short-hand send an http code / data
-     */
-    res.send = function(code, data) {
-      try {
-        if (data) {
-          const content = JSON.stringify(data);
-          this.writeHead(200, {
-            "Content-Length": Buffer.byteLength(content),
-            "Content-Type": "application/json"
-          });
-          this.write(content);
-        } else {
-          this.writeHead(code);
-        }
-        this.end();
-      } catch (ex) {
-        this.writeHead(500);
-        this.end();
-      }
-    }.bind(res);
-
-    if (browserRequest) {
-      /**
-       * Function attached to a response object for rending the view
-       *
-       * @param {*} data - Local values that are referenced in the EJS embedded code
-       */
-      res.render = function(data) {
-        try {
-          const template = fs.readFileSync(
-            `${dir}/app/views/${controllerParam}/${action}.html.ejs`,
-            "utf8"
+    res.send = require("./router/send.js").bind(res);
+    res.render = browserRequest
+      ? function(data) {
+          require("./router/render").call(
+            this,
+            dir,
+            controllerParam,
+            action,
+            data
           );
-          const rendered = ejs.render(template, data, {
-            views: [`${dir}/app/views`]
-          });
-
-          this.writeHead(200, {
-            "Content-Length": Buffer.byteLength(rendered),
-            "Content-Type": "text/html"
-          });
-          this.end(rendered);
-        } catch (ex) {
-          console.error(`Error rendering template: ${ex.message}`);
-          this.writeHead(400);
-          this.end();
-        }
-      }.bind(res);
-    }
+        }.bind(res)
+      : null;
 
     /**
      * Stream from Buffer and attach as `body` property to request
@@ -593,28 +383,10 @@ function Router() {
  * Module to create a Rails server instance to handle incoming http requests
  */
 function Server() {
-  const port = 3000;
   const router = new Router();
-  const instance = http.createServer(router.incomingRequest);
-
-  let started = false;
 
   function start() {
-    const start = Date.now();
-
-    if (started) {
-      throw new Error("Rails Error: cannot start an already started server");
-    }
-
-    instance.listen({ port }, listenerCallback);
-
-    function listenerCallback() {
-      started = true;
-
-      console.log(
-        `server listening on port ${port}. Startup took ${Date.now() - start}ms`
-      );
-    }
+    require("./server/start.js")(router.incomingRequest);
   }
 
   return {

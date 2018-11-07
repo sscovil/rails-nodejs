@@ -33,6 +33,7 @@ module.exports = function(name, root) {
           ejs: Config.versions.ejs,
           knex: Config.versions.knex,
           "rails-nodejs": Config.versions.npm,
+          sqlite3: Config.versions.sqlite3,
           uuid: Config.versions.uuid
         },
         devDependencies: {

@@ -36,6 +36,22 @@ if (cmd === "new") {
     console.error(`Error creating a controller: ${ex.message}`);
     process.exit(1);
   }
+} else if (cmd === "generate" && args[1] === "model") {
+  try {
+    const model = args[2];
+    const attrs = args.slice(3).map(attr => {
+      const pair = attr.split(":");
+      return {
+        name: pair[0],
+        type: pair[1]
+      };
+    });
+
+    cli.generateModel(dir, model, attrs);
+  } catch (ex) {
+    console.error(`Error creating a model: ${ex.message}`);
+    process.exit(1);
+  }
 } else {
   console.error(`Unknown command ${cmd} and args phrase`);
   process.exit(1);

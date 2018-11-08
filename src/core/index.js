@@ -174,6 +174,7 @@ function CLI() {
 
   return {
     generateController: require("./cli/generate/controller"),
+    generateModel: require("./cli/generate/model"),
     loadConfig,
     loadControllers,
     newProject: require("./cli/new.js")
@@ -394,5 +395,8 @@ function Server() {
 
 module.exports = {
   CLI,
+  Model: {
+    ActiveRecord: require("./model/base")
+  },
   Server
 };

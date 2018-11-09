@@ -374,7 +374,7 @@ module.exports = {
     ejs: "2.6.1",
     eslint: "5.8.0",
     knex: "0.15.2",
-    npm: "0.3.0",
+    npm: "0.4.0",
     prettier: "1.14.2",
     sqlite3: "4.0.3",
     uuid: "3.3.2"

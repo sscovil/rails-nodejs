@@ -52,6 +52,26 @@ if (cmd === "new") {
     console.error(`Error creating a model: ${ex.message}`);
     process.exit(1);
   }
+} else if (cmd === "db:migrate") {
+  try {
+    const db = require(`${dir}/db`);
+
+    db.migrate
+      .latest({
+        directory: `${dir}/db/migrations`
+      })
+      .then(function() {
+        console.log(`Done migrating db`);
+        process.exit(0);
+      })
+      .catch(function(err) {
+        console.error(`Error migrating db: ${err.message}`);
+        process.exit(1);
+      });
+  } catch (ex) {
+    console.error(`Error migrating db: ${ex.message}`);
+    process.exit(1);
+  }
 } else {
   console.error(`Unknown command ${cmd} and args phrase`);
   process.exit(1);

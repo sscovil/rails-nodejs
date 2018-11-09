@@ -29,6 +29,7 @@ module.exports = {
     "bin",
     "config",
     "db",
+    "db/migrations",
     "lib",
     "logs",
     "public",

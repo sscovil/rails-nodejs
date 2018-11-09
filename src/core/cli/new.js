@@ -52,7 +52,7 @@ module.exports = function(name, root) {
   // gitignore for files we dont want checked into source control
   fs.writeFileSync(
     `${projectDirectory}/.gitignore`,
-    `node_modules\npublic\nlog\ntmp/*\n`,
+    `node_modules\npublic\nlog\ntmp/*\ndb/sqlite.db\n`,
     "utf8"
   );
 
@@ -70,6 +70,13 @@ module.exports = function(name, root) {
   // base config.js file
   const config = JSON.stringify(
     {
+      db: {
+        client: "sqlite3",
+        connection: {
+          filename: "./db/sqlite.db"
+        },
+        useNullAsDefault: true
+      },
       routes: {
         root: "" // special route. must be a stringified path
       }
@@ -130,6 +137,21 @@ module.exports = function(name, root) {
   fs.writeFileSync(
     `${projectDirectory}/.eslintignore`,
     `node_modules\npackage.json\napp/assets\ntmp\npublic\nlogs`,
+    "utf8"
+  );
+
+  // empty sqlite db. default for new projects.
+  fs.writeFileSync(`${projectDirectory}/db/sqlite.db`, ``, "utf8");
+
+  // default connection to db that ActiveRecord will use
+  fs.writeFileSync(
+    `${projectDirectory}/db/index.js`,
+    `
+    const config = require('../config');
+    const knex = require('knex')(config.db);
+
+    module.exports = knex;
+    `,
     "utf8"
   );
 };

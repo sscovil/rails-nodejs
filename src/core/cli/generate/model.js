@@ -76,6 +76,7 @@ module.exports = async function(dir, name, attrs) {
   fs.writeFileSync(
     modelFile,
     `
+    const db = require('../../db');
     const Rails = require('rails-nodejs');
     const ActiveRecord = Rails.Model.ActiveRecord;
 

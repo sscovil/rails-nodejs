@@ -51,6 +51,55 @@ module.exports = class ActiveRecord {
     throw new Error("Not Implemented");
   }
 
+  static async find(id) {
+    // todo: get column definitions and make sure id is of matching type
+    const name = this.name;
+    const Model = require(`${process.cwd()}/app/models/${name}`);
+    const table = `${name.toLowerCase()}s`;
+
+    try {
+      const row = await db
+        .connection()
+        .select()
+        .from(table)
+        .where("id", id)
+        .first()
+        .catch(err => {
+          console.log(`Error caught: ${err.message}`);
+        });
+
+      if (!row) {
+        return null;
+      }
+
+      const cases = Object.keys(row).map(k => {
+        return {
+          snake: k,
+          camel: k
+            .split("_")
+            .map(
+              (v, i) => (i > 0 ? `${v[0].toUpperCase()}${v.substring(1)}` : v)
+            )
+            .join("")
+        };
+      });
+      const attrs = Object.keys(row).reduce((acc, curr) => {
+        const validColumn = cases.filter(c => c.snake === curr);
+
+        if (validColumn.length) {
+          acc[validColumn[0].camel] = row[curr];
+        }
+
+        return acc;
+      }, {});
+
+      return new Model(attrs);
+    } catch (ex) {
+      console.log(`Exception in ${name}.find :: ${ex.message}`);
+      return null;
+    }
+  }
+
   static async findBy() {
     throw new Error("Not Implemented");
   }
@@ -60,9 +109,13 @@ module.exports = class ActiveRecord {
   }
 
   async save() {
+    const name = this.constructor.name;
+    const Model = require(`${process.cwd()}/app/models/${name}`);
+    const table = `${name.toLowerCase()}s`;
+
     const columns = await db
       .connection()
-      .table("articles")
+      .table(table)
       .columnInfo();
 
     const cases = Object.keys(columns).map(k => {
@@ -86,10 +139,14 @@ module.exports = class ActiveRecord {
     }, {});
 
     try {
-      await db.insert(toSave);
+      await db
+        .connection()
+        .insert(toSave)
+        .into(table);
 
       return true;
     } catch (ex) {
+      console.log(`Error in ${name}.save :: ${ex.message}`);
       return false;
     }
   }

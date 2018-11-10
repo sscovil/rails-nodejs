@@ -22,7 +22,7 @@
   "bin": {
     "nrx": "./src/cli/index.js"
   },
-  "main": "./src/cli/index.js",
+  "main": "./src/core/index.js",
   "files": [
     "src/*"
   ],

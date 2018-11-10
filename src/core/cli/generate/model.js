@@ -81,8 +81,8 @@ module.exports = async function(dir, name, attrs) {
     const ActiveRecord = Rails.Model.ActiveRecord;
 
     module.exports = class ${name} extends ActiveRecord {
-      constructor() {
-
+      constructor(attrs) {
+        super(attrs);
       }
     };
     `,

@@ -28,13 +28,13 @@ module.exports = function(root, name, action) {
   if (action && Config.viewActionNames.indexOf(action) === -1) {
     fs.writeFileSync(
       `${root}/app/controllers/${name}/${action}.action.js`,
-      `module.exports = function(req, res) { res.send(204); }`,
+      `module.exports = async function(req, res) { res.send(204); }`,
       "utf8"
     );
   } else if (action && Config.viewActionNames.indexOf(action) !== -1) {
     fs.writeFileSync(
       `${root}/app/controllers/${name}/${action}.action.js`,
-      `module.exports = function(req, res) { res.render(); }`,
+      `module.exports = async function(req, res) { res.render(); }`,
       "utf8"
     );
   }

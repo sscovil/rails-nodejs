@@ -108,6 +108,13 @@ module.exports = class ActiveRecord {
     throw new Error("Not Implemented");
   }
 
+  static new(attrs) {
+    const name = this.name;
+    const Model = require(`${process.cwd()}/app/models/${name}`);
+
+    return new Model(attrs);
+  }
+
   async save() {
     const name = this.constructor.name;
     const Model = require(`${process.cwd()}/app/models/${name}`);

@@ -64,4 +64,5 @@ typings/
 links
 
 # IDE
+.idea
 .vscode

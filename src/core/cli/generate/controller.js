@@ -2,6 +2,7 @@
 
 const Config = require("../../config");
 const fs = require("fs");
+const { spawnSync } = require('child_process');
 
 /**
  * Create an empty controller or an optional action with it
@@ -46,4 +47,10 @@ module.exports = function(root, name, action) {
       "utf8"
     );
   }
+
+  spawnSync(`node_modules/.bin/prettier "app/**/*" --write`, {
+    stdio: `inherit`,
+    shell: true,
+    cwd: root
+  });
 };

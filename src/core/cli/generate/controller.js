@@ -2,7 +2,9 @@
 
 const Config = require("../../config");
 const fs = require("fs");
-const { spawnSync } = require('child_process');
+const prettier = require('prettier');
+
+const formatCode = (code) => prettier.format(code, { parser: `babylon` });
 
 /**
  * Create an empty controller or an optional action with it
@@ -29,13 +31,13 @@ module.exports = function(root, name, action) {
   if (action && Config.viewActionNames.indexOf(action) === -1) {
     fs.writeFileSync(
       `${root}/app/controllers/${name}/${action}.action.js`,
-      `module.exports = async function(req, res) { res.send(204); }`,
+      formatCode(`module.exports = async function(req, res) { res.send(204); }`),
       "utf8"
     );
   } else if (action && Config.viewActionNames.indexOf(action) !== -1) {
     fs.writeFileSync(
       `${root}/app/controllers/${name}/${action}.action.js`,
-      `module.exports = async function(req, res) { res.render(); }`,
+      formatCode(`module.exports = async function(req, res) { res.render(); }`),
       "utf8"
     );
   }
@@ -43,14 +45,8 @@ module.exports = function(root, name, action) {
   if (action && Config.viewActionNames.indexOf(action) !== -1) {
     fs.writeFileSync(
       `${root}/app/views/${name}/${action}.html.ejs`,
-      `<h1>${name}#${action}</h1>\n<p>Find me in app/views/${name}/${action}.html.ejs</p>`,
+      formatCode(`<div><h1>${name}#${action}</h1>\n<p>Find me in app/views/${name}/${action}.html.ejs</p></div>`),
       "utf8"
     );
   }
-
-  spawnSync(`node_modules/.bin/prettier "app/**/*" --write`, {
-    stdio: `inherit`,
-    shell: true,
-    cwd: root
-  });
 };

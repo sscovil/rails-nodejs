@@ -1,7 +1,9 @@
 "use strict";
 
 const fs = require("fs");
-const { spawnSync } = require('child_process');
+const prettier = require('prettier');
+
+const formatCode = (code) => prettier.format(code, { parser: `babylon` });
 
 module.exports = async function(dir, name, attrs) {
   const resource = `${name.toLowerCase()}s`;
@@ -53,46 +55,40 @@ module.exports = async function(dir, name, attrs) {
 
   fs.writeFileSync(
     migrationFile,
-    `
-    exports.up = async function(knex) {
-      await knex.schema.dropTableIfExists('${resource}');
-      await knex.schema.createTable('${resource}', (table) => {
-        table.uuid('id').primary();
-        ${attrs.reduce((acc, curr) => {
-          acc += `table.${curr.type}('${curr.name}');\n`;
-
-          return acc;
-        }, "")}
-        table.timestamps(true, true);
-      });
-    };
-
-    exports.down = async function(knex) {
-      await knex.schema.dropTableIfExists('${resource}');
-    };
-    `,
+    formatCode(`
+      exports.up = async function(knex) {
+        await knex.schema.dropTableIfExists('${resource}');
+        await knex.schema.createTable('${resource}', (table) => {
+          table.uuid('id').primary();
+          ${attrs.reduce((acc, curr) => {
+        acc += `table.${curr.type}('${curr.name}');\n`;
+  
+        return acc;
+      }, "")}
+          table.timestamps(true, true);
+        });
+      };
+  
+      exports.down = async function(knex) {
+        await knex.schema.dropTableIfExists('${resource}');
+      };
+    `),
     "utf8"
   );
 
   fs.writeFileSync(
     modelFile,
-    `
-    const db = require('../../db');
-    const Rails = require('rails-nodejs');
-    const ActiveRecord = Rails.Model.ActiveRecord;
-
-    module.exports = class ${name} extends ActiveRecord {
-      constructor(attrs) {
-        super(attrs);
-      }
-    };
-    `,
+    formatCode(`
+      const db = require('../../db');
+      const Rails = require('rails-nodejs');
+      const ActiveRecord = Rails.Model.ActiveRecord;
+  
+      module.exports = class ${name} extends ActiveRecord {
+        constructor(attrs) {
+          super(attrs);
+        }
+      };
+    `),
     "utf8"
   );
-
-  spawnSync(`node_modules/.bin/prettier "app/**/*" --write`, {
-    stdio: `inherit`,
-    shell: true,
-    cwd: dir
-  });
 };

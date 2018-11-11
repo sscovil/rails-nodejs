@@ -2,6 +2,7 @@
 
 const Config = require("../config");
 const fs = require("fs");
+const { spawnSync } = require('child_process');
 
 /**
  * Create a new rails project at the specified directory as the root
@@ -157,4 +158,10 @@ module.exports = function(name, root) {
     `,
     "utf8"
   );
+
+  spawnSync(`npm install`, {
+    stdio: `inherit`,
+    shell: true,
+    cwd: projectDirectory
+  });
 };

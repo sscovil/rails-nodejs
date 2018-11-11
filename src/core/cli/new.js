@@ -29,6 +29,9 @@ module.exports = function(name, root) {
         scripts: {
           start: "./node_modules/.bin/nrx start"
         },
+        engines: {
+          node: ">=8.11.0"
+        },
         dependencies: {
           ejs: Config.versions.ejs,
           knex: Config.versions.knex,

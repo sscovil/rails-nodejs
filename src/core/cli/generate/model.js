@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require("fs");
+const { spawnSync } = require('child_process');
 
 module.exports = async function(dir, name, attrs) {
   const resource = `${name.toLowerCase()}s`;
@@ -88,4 +89,10 @@ module.exports = async function(dir, name, attrs) {
     `,
     "utf8"
   );
+
+  spawnSync(`node_modules/.bin/prettier "app/**/*" --write`, {
+    stdio: `inherit`,
+    shell: true,
+    cwd: dir
+  });
 };

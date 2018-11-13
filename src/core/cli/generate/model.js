@@ -1,9 +1,7 @@
 "use strict";
 
 const fs = require("fs");
-const prettier = require('prettier');
-
-const formatCode = (code) => prettier.format(code, { parser: `babylon` });
+const { writePrettyFileSync } = require("../../lib/fs");
 
 module.exports = async function(dir, name, attrs) {
   const resource = `${name.toLowerCase()}s`;
@@ -53,18 +51,18 @@ module.exports = async function(dir, name, attrs) {
     );
   }
 
-  fs.writeFileSync(
+  const migrationColumns = attrs.reduce(
+    (acc, curr) => acc += `\ntable.${curr.type}('${curr.name}');`,
+    ""
+  );
+
+  writePrettyFileSync(
     migrationFile,
-    formatCode(`
+    `
       exports.up = async function(knex) {
         await knex.schema.dropTableIfExists('${resource}');
         await knex.schema.createTable('${resource}', (table) => {
-          table.uuid('id').primary();
-          ${attrs.reduce((acc, curr) => {
-        acc += `table.${curr.type}('${curr.name}');\n`;
-  
-        return acc;
-      }, "")}
+          table.uuid('id').primary();${migrationColumns}
           table.timestamps(true, true);
         });
       };
@@ -72,13 +70,12 @@ module.exports = async function(dir, name, attrs) {
       exports.down = async function(knex) {
         await knex.schema.dropTableIfExists('${resource}');
       };
-    `),
-    "utf8"
+    `
   );
 
-  fs.writeFileSync(
+  writePrettyFileSync(
     modelFile,
-    formatCode(`
+    `
       const db = require('../../db');
       const Rails = require('rails-nodejs');
       const ActiveRecord = Rails.Model.ActiveRecord;
@@ -88,7 +85,6 @@ module.exports = async function(dir, name, attrs) {
           super(attrs);
         }
       };
-    `),
-    "utf8"
+    `
   );
 };

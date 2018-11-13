@@ -2,9 +2,7 @@
 
 const Config = require("../../config");
 const fs = require("fs");
-const prettier = require('prettier');
-
-const formatCode = (code) => prettier.format(code, { parser: `babylon` });
+const { writePrettyFileSync } = require("../../lib/fs");
 
 /**
  * Create an empty controller or an optional action with it
@@ -28,25 +26,24 @@ module.exports = function(root, name, action) {
   fs.mkdirSync(`${root}/app/views/${name}`);
 
   // todo: implement send function for api
-  if (action && Config.viewActionNames.indexOf(action) === -1) {
-    fs.writeFileSync(
+
+  const isViewAction = Config.viewActionNames.indexOf(action) !== -1;
+
+  if (action && isViewAction) {
+    writePrettyFileSync(
       `${root}/app/controllers/${name}/${action}.action.js`,
-      formatCode(`module.exports = async function(req, res) { res.send(204); }`),
-      "utf8"
+      `module.exports = async function(req, res) { res.render(); }`
     );
-  } else if (action && Config.viewActionNames.indexOf(action) !== -1) {
-    fs.writeFileSync(
-      `${root}/app/controllers/${name}/${action}.action.js`,
-      formatCode(`module.exports = async function(req, res) { res.render(); }`),
-      "utf8"
+    writePrettyFileSync(
+      `${root}/app/views/${name}/${action}.html.ejs`,
+      `<div>\n  <h1>${name}#${action}</h1>\n  <p>Find me in app/views/${name}/${action}.html.ejs</p>\n</div>`
     );
   }
 
-  if (action && Config.viewActionNames.indexOf(action) !== -1) {
-    fs.writeFileSync(
-      `${root}/app/views/${name}/${action}.html.ejs`,
-      formatCode(`<div><h1>${name}#${action}</h1>\n<p>Find me in app/views/${name}/${action}.html.ejs</p></div>`),
-      "utf8"
+  if (action && !isViewAction) {
+    writePrettyFileSync(
+      `${root}/app/controllers/${name}/${action}.action.js`,
+      `module.exports = async function(req, res) { res.send(204); }`
     );
   }
 };
